@@ -69,6 +69,54 @@ A full example:
 
 	docker run -tid -v <DIRECTORY>:/opt/aerospike/etc --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server /usr/bin/asd --foreground --config-file /opt/aerospike/etc/aerospike.conf
 
+**NOTE**: The template file `aerospike.template.conf` cannot be used without substituting actual values for `${SERVICE_THREADS}`, `${TRANSACTION_QUEUES}` etc. Use `aerospike.example.conf` for a configuration file that can be used as is. This file initializes a namespace (analogous to `database` in SQL) `segments`
+
+**Example of running a server and an aql client that connects to it**
+
+1. Start the server with a namespace `segments` either by:
+
+i) Using environment variables:
+```
+docker run -e "NAMESPACE=segments" -ti --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server
+```
+OR
+
+ii) Use `aerospike.example.conf` as a configuration file:
+```
+docker run -ti -v <absolute_path_to_local_repo>:/opt/aerospike/etc --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server /usr/bin/asd --foreground --config-file /opt/aerospike/etc/aerospike.example.conf
+```
+
+**Running a client cli that talks to this server**:
+1. Start `aql` (stands for aerospike query language, this is analogous to `psql` or `redis-cli`):
+```
+docker run -ti --name aerospike-tools --link /aerospike:aerospike aerospike/aerospike-tools aql
+```
+
+2. Show all the available namespaces:
+```
+aql> show namespaces
++------------+
+| namespaces |
++------------+
+| "segments" |
++------------+
+[172.17.0.2:3000] 1 row in set (0.002 secs)
+```
+
+3. Insert something into a set `FS1` (analogous to a table) in the namespace `segments`:
+```
+aql> insert into segments.FS1 (PK, chunkbytes) values ('anirudh.ts', 34)
+OK, 1 record affected.
+
+aql> select * from segments
++------------+
+| chunkbytes |
++------------+
+| 34         |
++------------+
+1 row in set (0.166 secs)
+```
+
 ## access-address Configuration
 
 In order for Aerospike to properly broadcast its address to the cluster or applications, the **access-address** needs to be set in the configuration file. If it is not set, then the IP address within the container will be used, which is not accessible to other nodes.
