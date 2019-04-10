@@ -74,11 +74,13 @@ A full example:
 **Example of running a server and an aql client that connects to it**
 
 1. Start the server with a namespace `segments` either by:
+
 i) Using environment variables:
 ```
 docker run -e "NAMESPACE=segments" -ti --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server
 ```
 OR
+
 ii) Use `aerospike.example.conf` as a configuration file:
 ```
 docker run -ti -v <absolute_path_to_local_repo>:/opt/aerospike/etc --name aerospike -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 aerospike/aerospike-server /usr/bin/asd --foreground --config-file /opt/aerospike/etc/aerospike.example.conf
